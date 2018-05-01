@@ -1,6 +1,6 @@
-BSD 3-Clause License
+# BSD 3-Clause License
 
-Copyright (c) 2018, Jason C. McDonald
+Copyright (c) 2017, Jason C. McDonald
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
