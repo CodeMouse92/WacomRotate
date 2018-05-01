@@ -1,0 +1,98 @@
+#!/bin/bash
+
+# WacomRotate
+# Easily rotate the orientation of a Wacom graphics tablet,
+# without having to muck through a bunch of device lists.
+#
+# AUTHOR(S): Jason C. McDonald
+# VERSION: 1.0
+# GITHUB: https://github.com/CodeMouse92/WacomRotate
+
+# Copyright (c) 2018 Jason C. McDonald.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the <organization> nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+orientation="$1"
+
+#Isolate the id of the stylus and eraser devices automatically.
+rawID1=`xsetwacom --list | pcregrep -M 'STYLUS' | pcregrep -o 'id\: \d*'`
+rawID2=`xsetwacom --list | pcregrep -M 'ERASER' | pcregrep -o 'id\: \d*'`
+#Trim further
+device1=`echo "$rawID1" | grep -o "[0-9]\+"`
+device2=`echo "$rawID2" | grep -o "[0-9]\+"`
+
+if [[ -z "$device1" && -z "$device2" ]]
+then
+    echo "No Wacom stylus or eraser detected."
+    exit 0
+fi
+
+d1r="none"
+d2r="none"
+
+case $orientation in
+	p)
+		echo "Rotating to Portrait"
+		d1r="ccw"
+		d2r="ccw"
+		;;
+	l)
+		echo "Rotating to Landscape (default)"
+		d1r="none"
+		d2r="none"
+		;;
+	pf)
+		echo "Rotating to Portrait Flipped"
+		d1r="cw"
+		d2r="cw"
+		;;
+	lf)
+		echo "Rotating to Landscape Flipped"
+		d1r="half"
+		d2r="half"
+		;;
+	*)
+		echo "Please specify a valid option:"
+		echo "     p = Portrait"
+		echo "     l = Landscape"
+		echo "    pf = Portrait Flipped"
+		echo "    lf = Landscape Flipped"
+		exit
+		;;
+esac
+
+# Map the devices to the selected display
+if [ -n "$device1" ]
+then
+    echo "Rotating Wacom Stylus..."
+    xsetwacom --set $device1 rotate $d1r
+fi
+
+if [ -n "$device2" ]
+then
+    echo "Rotating Wacom Eraser..."
+    xsetwacom --set $device2 rotate $d2r
+fi
+
+echo "Happy drawing!"
